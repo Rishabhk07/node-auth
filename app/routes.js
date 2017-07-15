@@ -15,10 +15,17 @@ module.exports = function (app, passport) {
     });
 
     app.get('/profile',function (req, res) {
+        console.log(JSON.stringify(req.user));
         res.render('profile.ejs',{
             user: req.user
         })
     });
+
+    app.post('/signup',passport.authenticate('local-signup',{
+        successRedirect: '/profile',
+        failureRedirect: '/signup',
+        failureFlash: true
+    }))
 
     app.get('/logout',function (req,res) {
         req.logout();

@@ -7,12 +7,18 @@ const passport  = require('passport');
 const bodyParser = require('body-parser');
 const flash = require('connect-flash')
 const session = require('express-session')
+const sequelize = require('sequelize')
+
 app.set('view engine','ejs')
 app.use(session({secret: 'rishabhkhanna'}))
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser())
 app.use(flash())
+
+
+
+require('./config/passport')(passport);
 
 
 
