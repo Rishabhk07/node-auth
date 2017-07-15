@@ -14,7 +14,7 @@ module.exports = function (app, passport) {
         })
     });
 
-    app.get('/profile',function (req, res) {
+    app.get('/profile',isLoggedIn,function (req, res) {
         console.log(JSON.stringify(req.user));
         res.render('profile.ejs',{
             user: req.user
@@ -43,6 +43,6 @@ module.exports = function (app, passport) {
             return next();
         }
 
-        res.redirect('/')
+        res.redirect('/login')
     }
 };
