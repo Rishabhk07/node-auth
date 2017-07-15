@@ -18,5 +18,5 @@ let userSchema = db.define('user',{
                 autoIncrement: true
         }
 });
-userSchema.sync({force: true});
+userSchema.sync();
 module.exports = userSchema;
