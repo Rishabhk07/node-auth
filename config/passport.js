@@ -1,9 +1,12 @@
 /**
  * Created by rishabhkhanna on 16/07/17.
  */
-var LocalStrategy = require('passport-local').Strategy
+let LocalStrategy = require('passport-local').Strategy;
+let FacebookStrategy = require('passport-facebook').Strategy;
+let User = require('../app/models/user');
 
-var User = require('../app/models/user');
+let confidAuth = require('./auth');
+
 
 module.exports = function (passport) {
     passport.serializeUser(function (user, done) {
@@ -14,7 +17,7 @@ module.exports = function (passport) {
             done(null, project)
         })
     });
-
+    //================== SignUp Strategy
     passport.use('local-signup', new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password',
@@ -32,7 +35,8 @@ module.exports = function (passport) {
                 } else {
                     const user = User.build({
                         email: email,
-                        password: password
+                        password: password,
+                        via: 'local'
                     });
                     user.save().then(function () {
                         console.log("success in saving");
@@ -44,7 +48,7 @@ module.exports = function (passport) {
             })
         })
     }));
-
+    // ======================= Login Strategy
     passport.use('local-login', new LocalStrategy({
             usernameField: 'email',
             password: 'password',
@@ -56,16 +60,54 @@ module.exports = function (passport) {
                 if (err)
                     return done(err);
 
-                if(!user){
-                    return done(null, false, req.flash('loginMessage','No User Found'))
+                if (!user) {
+                    return done(null, false, req.flash('loginMessage', 'No User Found'))
                 }
 
-                if(user.password !== password){
-                    return done(null,false, req.flash('loginMessage','oops wrong password'))
+                if (user.password !== password) {
+                    return done(null, false, req.flash('loginMessage', 'oops wrong password'))
                 }
 
-                return done(null ,user)
+                return done(null, user)
+            })
+        }
+    ))
+// ========================== Facebook Strategy
+    passport.use(new FacebookStrategy({
+            clientID: confidAuth.facebookAuth.clientID,
+            clientSecret: confidAuth.facebookAuth.clientSecret,
+            callbackURL: confidAuth.facebookAuth.callbackURL,
+            profileFields: ['emails','displayName']
+        },
+        function (token, refreshToken, profile, done) {
+            process.nextTick(function () {
+                User.findOne({where: {id: profile.id}}).then(function (user, err) {
+                    console.log(JSON.stringify(profile));
+                    if(err)
+                        throw err;
+                    if(user){
+                        return done(null,user)
+                    }else{
+                        //
+                        const user = User.build({
+                            id: profile.id,
+                            token: token,
+                            name: profile.displayName,
+                            email: profile.emails[0].value
+                        });
+                        user.save().then(function () {
+                            console.log("success in saving");
+                            return done(null, user)
+                        }).catch(function (err) {
+                            console.log(err)
+                        })
+                    //
+                    }
+                })
             })
         }
     ))
 };
+
+
+

@@ -9,14 +9,22 @@ const db = new sequelize({
     password: 'beyblade',
     dialect: 'mysql'
 })
-let userSchema = db.define('user',{
-        email : sequelize.DataTypes.STRING,
-        password : sequelize.DataTypes.STRING,
+let userSchema = db.define('user', {
+
+        email: {
+            type: sequelize.DataTypes.STRING,
+            unique: true
+        },
+        password: sequelize.DataTypes.STRING,
         key: {
-                type: sequelize.DataTypes.INTEGER,
-                primaryKey: true,
-                autoIncrement: true
-        }
+            type: sequelize.DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        id: sequelize.DataTypes.STRING,
+        token: sequelize.DataTypes.STRING,
+        name: sequelize.DataTypes.STRING,
+        via: sequelize.DataTypes.STRING
 });
-userSchema.sync();
+userSchema.sync({force:true});
 module.exports = userSchema;
