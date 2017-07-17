@@ -3,7 +3,9 @@
  */
 let LocalStrategy = require('passport-local').Strategy;
 let FacebookStrategy = require('passport-facebook').Strategy;
+let BearerStrategy = require('passport-http-bearer').Strategy;
 let User = require('../app/models/user');
+let axios = require('axios');
 
 let confidAuth = require('./auth');
 
@@ -77,21 +79,23 @@ module.exports = function (passport) {
             clientID: confidAuth.facebookAuth.clientID,
             clientSecret: confidAuth.facebookAuth.clientSecret,
             callbackURL: confidAuth.facebookAuth.callbackURL,
-            profileFields: ['emails','displayName']
+            profileFields: ['emails', 'displayName']
         },
         function (token, refreshToken, profile, done) {
             process.nextTick(function () {
                 User.findOne({where: {id: profile.id}}).then(function (user, err) {
                     console.log(JSON.stringify(profile));
-                    if(err)
+                    if (err)
                         throw err;
-                    if(user){
-                        return done(null,user)
-                    }else{
+                    if (user) {
+                        user.access_token = token;
+                        return done(null, user)
+                    } else {
                         //
                         const user = User.build({
                             id: profile.id,
-                            token: token,
+                            access_token: token,
+                            refresh_token: refreshToken,
                             name: profile.displayName,
                             email: profile.emails[0].value
                         });
@@ -101,12 +105,30 @@ module.exports = function (passport) {
                         }).catch(function (err) {
                             console.log(err)
                         })
-                    //
+                        //
                     }
                 })
             })
         }
-    ))
+    ));
+
+    passport.use(
+        new BearerStrategy(
+            function (token, done) {
+                User.findOne({where: {access_token: token}})
+                    .then(function (user, err) {
+                        if (err)
+                            throw err;
+                        if (!user)
+                            return done(null, false);
+
+                        return done(null, user)
+                    })
+            }
+        )
+    )
+
+
 };
 
 

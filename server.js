@@ -13,10 +13,10 @@ app.set('view engine','ejs')
 app.use(session({secret: 'rishabhkhanna'}))
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(bodyParser())
+// app.use(bodyParser())
 app.use(flash())
 
-
+app.use(bodyParser.urlencoded({extended: false}))
 
 require('./config/passport')(passport);
 

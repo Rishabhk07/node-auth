@@ -22,9 +22,10 @@ let userSchema = db.define('user', {
             autoIncrement: true
         },
         id: sequelize.DataTypes.STRING,
-        token: sequelize.DataTypes.STRING,
+        access_token : sequelize.DataTypes.STRING,
+        refresh_token: sequelize.DataTypes.STRING,
         name: sequelize.DataTypes.STRING,
         via: sequelize.DataTypes.STRING
 });
-userSchema.sync({force:true});
+userSchema.sync();
 module.exports = userSchema;
