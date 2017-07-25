@@ -16,13 +16,13 @@ function authenticateUser(firstName, lastName, token, userId,callback) {
             if(user.access_token != token){
                 callback({success:true});
             }else{
-                axios.get('https://graph.facebook.com/v2.6/'+ userId +'?fields=email&access_token=' + token)
+                axios.get('https://graph.facebook.com/v2.6/'+ userId +'?fields=email,name&access_token=' + token)
                     .then(function (response) {
                         const user = User.build({
                             id: userId,
                             access_token: token,
                             email: response.data.email,
-                            name: firstName + " " + lastName
+                            name: response.data.name
                         });
                         user.save().then(function () {
                             console.log("success in saving");
@@ -31,7 +31,6 @@ function authenticateUser(firstName, lastName, token, userId,callback) {
                             console.log(err)
                         })
                     })
-
             }
         })
 }
